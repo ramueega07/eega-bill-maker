@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { createRoot } from "react-dom/client";
+import { StrictMode } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,6 +12,7 @@ import Navbar from "@/components/Navbar";
 import { isAuthenticated } from "@/lib/auth";
 import { getInvoices, searchInvoices, filterInvoicesByDate, type Invoice } from "@/lib/storage";
 import { generatePDF } from "@/lib/pdf";
+import InvoiceTemplate from "@/components/InvoiceTemplate";
 import { toast } from "sonner";
 
 const DownloadBills = () => {
@@ -27,30 +30,33 @@ const DownloadBills = () => {
     if (!isAuthenticated()) {
       navigate("/login");
     } else {
-      const allInvoices = getInvoices();
-      setInvoices(allInvoices);
-      setFilteredInvoices(allInvoices);
+      (async () => {
+        const allInvoices = await getInvoices();
+        setInvoices(allInvoices);
+        setFilteredInvoices(allInvoices);
+      })();
     }
   }, [navigate]);
 
-  const handleFilter = () => {
-    let results = [...invoices];
+  const handleFilter = async () => {
+    let results: Invoice[] = [];
 
     if (filters.fromDate && filters.toDate) {
-      results = filterInvoicesByDate(filters.fromDate, filters.toDate);
+      results = await filterInvoicesByDate(filters.fromDate, filters.toDate);
+    } else if (filters.invoiceNo || filters.customerName) {
+      const query = filters.invoiceNo || filters.customerName;
+      results = await searchInvoices(query);
+    } else {
+      results = await getInvoices();
     }
 
+    // Additional client-side refine if both invoiceNo and customerName provided
     if (filters.invoiceNo) {
-      results = results.filter(inv => 
-        inv.invoiceNo.toLowerCase().includes(filters.invoiceNo.toLowerCase())
-      );
+      results = results.filter(inv => inv.invoiceNo.toLowerCase().includes(filters.invoiceNo.toLowerCase()));
     }
-
     if (filters.customerName) {
-      results = results.filter(inv => 
-        inv.receiver.name.toLowerCase().includes(filters.customerName.toLowerCase()) ||
-        inv.consignee.name.toLowerCase().includes(filters.customerName.toLowerCase())
-      );
+      const q = filters.customerName.toLowerCase();
+      results = results.filter(inv => inv.receiver.name.toLowerCase().includes(q) || inv.consignee.name.toLowerCase().includes(q));
     }
 
     setFilteredInvoices(results);
@@ -69,15 +75,48 @@ const DownloadBills = () => {
   };
 
   const handleDownload = async (invoice: Invoice) => {
-    // Create a temporary element with the invoice
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = document.getElementById('invoice-template')?.innerHTML || '';
-    document.body.appendChild(tempDiv);
-    
-    await generatePDF('invoice-template', `${invoice.invoiceNo}.pdf`);
-    
-    document.body.removeChild(tempDiv);
-    toast.success("PDF downloaded successfully!");
+    try {
+      // Create a temporary hidden container for the invoice template
+      const tempContainer = document.createElement('div');
+      tempContainer.style.position = 'fixed';
+      tempContainer.style.left = '-9999px';
+      tempContainer.style.top = '0';
+      tempContainer.style.width = '210mm';
+      tempContainer.style.background = 'white';
+      document.body.appendChild(tempContainer);
+
+      // Create the invoice template div
+      const invoiceDiv = document.createElement('div');
+      invoiceDiv.id = 'invoice-template';
+      tempContainer.appendChild(invoiceDiv);
+
+      // Render the InvoiceTemplate component using React
+      const reactRoot = createRoot(invoiceDiv);
+      reactRoot.render(
+        <StrictMode>
+          <InvoiceTemplate invoice={invoice} />
+        </StrictMode>
+      );
+
+      // Wait for rendering to complete (images, fonts, etc.)
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // Generate PDF
+      await generatePDF('invoice-template', `${invoice.invoiceNo}.pdf`);
+      
+      // Cleanup
+      setTimeout(() => {
+        reactRoot.unmount();
+        if (document.body.contains(tempContainer)) {
+          document.body.removeChild(tempContainer);
+        }
+      }, 100);
+      
+      toast.success("PDF downloaded successfully!");
+    } catch (error) {
+      console.error('PDF generation error:', error);
+      toast.error("Failed to generate PDF. Please try again.");
+    }
   };
 
   return (

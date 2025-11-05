@@ -56,8 +56,8 @@ const InvoiceReview = () => {
     amountInWords: toWords(Math.floor(invoiceData.grandTotal)).toUpperCase() + " RUPEES ONLY",
   };
 
-  const handleSaveAndPrint = () => {
-    saveInvoice(invoice);
+  const handleSaveAndPrint = async () => {
+    await saveInvoice(invoice);
     toast.success("Invoice saved successfully!");
     setTimeout(() => {
       printInvoice();
