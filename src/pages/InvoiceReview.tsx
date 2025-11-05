@@ -93,13 +93,18 @@ const InvoiceReview = () => {
           </div>
         </div>
 
-        <div className="bg-white shadow-2xl rounded-lg p-8">
+        <div className="bg-white shadow-2xl rounded-lg p-8 print-wrapper">
           <InvoiceTemplate invoice={invoice} />
         </div>
       </main>
 
       <style>{`
         @media print {
+          @page {
+            size: A4;
+            margin: 4mm;
+          }
+          html, body { margin: 0; padding: 0; }
           body * {
             visibility: hidden;
           }
@@ -110,7 +115,14 @@ const InvoiceReview = () => {
             position: absolute;
             left: 0;
             top: 0;
-            width: 100%;
+            width: 210mm;
+            transform: scale(0.965);
+            transform-origin: top left;
+          }
+          .print-wrapper {
+            padding: 0 !important;
+            box-shadow: none !important;
+            background: transparent !important;
           }
         }
       `}</style>

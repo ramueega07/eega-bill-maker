@@ -41,11 +41,11 @@ const GenerateBill = () => {
   });
 
   const [items, setItems] = useState<InvoiceItem[]>([
-    { description: "", hsnCode: "5208", price: 0, meters: 0, rate: 0, amount: 0 }
+    { description: "", hsnCode: "5208", pieces: 0, meters: 0, rate: 0, amount: 0 }
   ]);
 
   const addItem = () => {
-    setItems([...items, { description: "", hsnCode: "5208", price: 0, meters: 0, rate: 0, amount: 0 }]);
+    setItems([...items, { description: "", hsnCode: "5208", pieces: 0, meters: 0, rate: 0, amount: 0 }]);
   };
 
   const removeItem = (index: number) => {
@@ -119,7 +119,7 @@ const GenerateBill = () => {
       consigneeState: "",
       consigneeCode: "",
     });
-    setItems([{ description: "", hsnCode: "5208", price: 0, meters: 0, rate: 0, amount: 0 }]);
+    setItems([{ description: "", hsnCode: "5208", pieces: 0, meters: 0, rate: 0, amount: 0 }]);
     toast.success("Form cleared");
   };
 
@@ -259,11 +259,11 @@ const GenerateBill = () => {
                           />
                         </div>
                         <div>
-                          <Label>Price/Meter</Label>
+                          <Label>Pieces</Label>
                           <Input 
                             type="number" 
-                            value={item.price || ''} 
-                            onChange={(e) => updateItem(index, 'price', Number(e.target.value))}
+                            value={item.pieces || ''} 
+                            onChange={(e) => updateItem(index, 'pieces', Number(e.target.value))}
                           />
                         </div>
                         <div>
