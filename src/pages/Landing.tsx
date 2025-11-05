@@ -30,9 +30,8 @@ const Landing = () => {
                 Generate Bill
               </Button>
               <Button
-                variant="outline"
                 onClick={() => navigate("/login")}
-                className="border-white/20 text-white hover:bg-white/10"
+                className="bg-white text-secondary hover:bg-white/90"
               >
                 <Download className="mr-2 h-4 w-4" />
                 Download Bills
@@ -71,9 +70,8 @@ const Landing = () => {
             </Button>
             <Button
               size="lg"
-              variant="outline"
               onClick={() => navigate("/login")}
-              className="text-lg px-8 py-6"
+              className="bg-white text-secondary hover:bg-white/90 text-lg px-8 py-6"
             >
               <Download className="mr-2 h-5 w-5" />
               Download Bills

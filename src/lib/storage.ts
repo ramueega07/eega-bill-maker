@@ -39,43 +39,41 @@ export interface Invoice {
   amountInWords: string;
 }
 
-const STORAGE_KEY = 'ramakrishna_invoices';
 const COUNTER_KEY = 'invoice_counter';
+const API_BASE = 'http://localhost:3001/api';
 
-export const getInvoices = (): Invoice[] => {
-  const data = localStorage.getItem(STORAGE_KEY);
-  return data ? JSON.parse(data) : [];
+export const getInvoices = async (): Promise<Invoice[]> => {
+  const res = await fetch(`${API_BASE}/invoices`);
+  if (!res.ok) return [];
+  return await res.json();
 };
 
-export const saveInvoice = (invoice: Invoice): void => {
-  const invoices = getInvoices();
-  invoices.push(invoice);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(invoices));
-};
-
-export const getInvoiceByNumber = (invoiceNo: string): Invoice | undefined => {
-  const invoices = getInvoices();
-  return invoices.find(inv => inv.invoiceNo === invoiceNo);
-};
-
-export const searchInvoices = (query: string): Invoice[] => {
-  const invoices = getInvoices();
-  const lowerQuery = query.toLowerCase();
-  return invoices.filter(inv => 
-    inv.invoiceNo.toLowerCase().includes(lowerQuery) ||
-    inv.receiver.name.toLowerCase().includes(lowerQuery) ||
-    inv.consignee.name.toLowerCase().includes(lowerQuery)
-  );
-};
-
-export const filterInvoicesByDate = (fromDate: string, toDate: string): Invoice[] => {
-  const invoices = getInvoices();
-  return invoices.filter(inv => {
-    const invDate = new Date(inv.date);
-    const from = new Date(fromDate);
-    const to = new Date(toDate);
-    return invDate >= from && invDate <= to;
+export const saveInvoice = async (invoice: Invoice): Promise<void> => {
+  await fetch(`${API_BASE}/invoices`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(invoice),
   });
+};
+
+export const getInvoiceByNumber = async (invoiceNo: string): Promise<Invoice | undefined> => {
+  const res = await fetch(`${API_BASE}/invoices/${invoiceNo}`);
+  if (!res.ok) return undefined;
+  return await res.json();
+};
+
+export const searchInvoices = async (query: string): Promise<Invoice[]> => {
+  const params = new URLSearchParams({ customerName: query, invoiceNo: query });
+  const res = await fetch(`${API_BASE}/invoices?${params.toString()}`);
+  if (!res.ok) return [];
+  return await res.json();
+};
+
+export const filterInvoicesByDate = async (fromDate: string, toDate: string): Promise<Invoice[]> => {
+  const params = new URLSearchParams({ fromDate, toDate });
+  const res = await fetch(`${API_BASE}/invoices?${params.toString()}`);
+  if (!res.ok) return [];
+  return await res.json();
 };
 
 export const generateInvoiceNumber = (): string => {
