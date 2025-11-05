@@ -18,11 +18,16 @@ const GenerateBill = () => {
   useEffect(() => {
     if (!isAuthenticated()) {
       navigate("/login");
+      return;
     }
+    (async () => {
+      const nextNo = await generateInvoiceNumber();
+      setFormData(prev => ({ ...prev, invoiceNo: nextNo }));
+    })();
   }, [navigate]);
 
   const [formData, setFormData] = useState({
-    invoiceNo: generateInvoiceNumber(),
+    invoiceNo: "",
     date: new Date().toISOString().split('T')[0],
     wayBillNo: "",
     transportMode: "",
@@ -100,9 +105,10 @@ const GenerateBill = () => {
     navigate("/invoice-review", { state: invoiceData });
   };
 
-  const handleClear = () => {
+  const handleClear = async () => {
+    const nextNo = await generateInvoiceNumber();
     setFormData({
-      invoiceNo: generateInvoiceNumber(),
+      invoiceNo: nextNo,
       date: new Date().toISOString().split('T')[0],
       wayBillNo: "",
       transportMode: "",

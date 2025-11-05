@@ -39,7 +39,6 @@ export interface Invoice {
   amountInWords: string;
 }
 
-const COUNTER_KEY = 'invoice_counter';
 const API_BASE = 'http://localhost:3001/api';
 
 export const getInvoices = async (): Promise<Invoice[]> => {
@@ -76,25 +75,14 @@ export const filterInvoicesByDate = async (fromDate: string, toDate: string): Pr
   return await res.json();
 };
 
-export const generateInvoiceNumber = (): string => {
+export const generateInvoiceNumber = async (): Promise<string> => {
   const today = new Date();
   const dateStr = today.toISOString().split('T')[0].replace(/-/g, '');
-  const counter = getCounter();
-  const paddedCounter = String(counter).padStart(3, '0');
-  incrementCounter();
-  return `INV${dateStr}-${paddedCounter}`;
-};
-
-const getCounter = (): number => {
-  const counter = localStorage.getItem(COUNTER_KEY);
-  return counter ? parseInt(counter) : 1;
-};
-
-const incrementCounter = (): void => {
-  const counter = getCounter();
-  localStorage.setItem(COUNTER_KEY, String(counter + 1));
-};
-
-export const resetCounter = (): void => {
-  localStorage.setItem(COUNTER_KEY, '1');
+  const res = await fetch(`${API_BASE}/next-invoice?date=${dateStr}`);
+  if (!res.ok) {
+    // Fallback to a local sequence starting at 1
+    return `INV${dateStr}-001`;
+  }
+  const data = await res.json();
+  return data.invoiceNo as string;
 };
