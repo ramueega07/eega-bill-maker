@@ -20,7 +20,7 @@ const InvoiceTemplate = ({ invoice }: InvoiceTemplateProps) => {
         {/* Top Section */}
         <div className="border-b-2 border-black p-4 text-center">
           <div className="text-sm mb-1">TAX INVOICE</div>
-          <div className="flex justify-between items-start">
+          <div className="flex justify-end items-start">
             <div className="text-xs">Cell: 9440915624, 7382562207</div>
           </div>
           <h1 className="text-3xl font-bold mb-1" style={{ color: '#DC143C' }}>
@@ -30,9 +30,10 @@ const InvoiceTemplate = ({ invoice }: InvoiceTemplateProps) => {
           <div className="text-sm">
             #6-6-56/1, Geetha nagar, <strong>SIRCILLA - 505 301</strong>, Dist: Rajanna Sircilla. (T.S.)
           </div>
-          <div className="text-sm mt-1">
-            <strong style={{ color: '#DC143C' }}>GSTIN: 36AAQPE5740B12X</strong>
-            <span className="float-right">Prop: Eega Balaji</span>
+          <div className="text-sm mt-1 grid grid-cols-3 items-center">
+            <span></span>
+            <strong className="justify-self-center" style={{ color: '#DC143C' }}>GSTIN: 36AAQPE5740B12X</strong>
+            <span className="justify-self-end">Prop: Eega Balaji</span>
           </div>
         </div>
 
@@ -51,7 +52,7 @@ const InvoiceTemplate = ({ invoice }: InvoiceTemplateProps) => {
               </div>
               <div className="p-2 text-sm">{invoice.wayBillNo}</div>
             </div>
-            <div className="grid grid-cols-3">
+            <div className="grid grid-cols-3 border-b border-black">
               <div className="p-2 text-sm border-r border-black">
                 <strong>State</strong>
               </div>
@@ -125,7 +126,7 @@ const InvoiceTemplate = ({ invoice }: InvoiceTemplateProps) => {
                 <th className="border-r border-black p-2 text-left">S.No</th>
                 <th className="border-r border-black p-2 text-left">Description of Goods</th>
                 <th className="border-r border-black p-2 text-center">HSN Code</th>
-                <th className="border-r border-black p-2 text-right">Price</th>
+                <th className="border-r border-black p-2 text-right">Pieces</th>
                 <th className="border-r border-black p-2 text-right">Meters</th>
                 <th className="border-r border-black p-2 text-right">Rate</th>
                 <th className="p-2 text-right">Amount Rs</th>
@@ -137,7 +138,7 @@ const InvoiceTemplate = ({ invoice }: InvoiceTemplateProps) => {
                   <td className="border-r border-black p-2">{index + 1}</td>
                   <td className="border-r border-black p-2">{item.description}</td>
                   <td className="border-r border-black p-2 text-center">{item.hsnCode}</td>
-                  <td className="border-r border-black p-2 text-right">{item.price.toFixed(2)}</td>
+                  <td className="border-r border-black p-2 text-right">{item.pieces}</td>
                   <td className="border-r border-black p-2 text-right">{item.meters}</td>
                   <td className="border-r border-black p-2 text-right">{item.rate.toFixed(2)}</td>
                   <td className="p-2 text-right">{item.amount.toFixed(2)}</td>

@@ -3,7 +3,7 @@
 export interface InvoiceItem {
   description: string;
   hsnCode: string;
-  price: number;
+  pieces: number;
   meters: number;
   rate: number;
   amount: number;
