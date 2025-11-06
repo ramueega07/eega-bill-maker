@@ -77,12 +77,33 @@ export const filterInvoicesByDate = async (fromDate: string, toDate: string): Pr
 
 export const generateInvoiceNumber = async (): Promise<string> => {
   const today = new Date();
-  const dateStr = today.toISOString().split('T')[0].replace(/-/g, '');
-  const res = await fetch(`${API_BASE}/next-invoice?date=${dateStr}`);
+  // Format date as YYYYMMDD (no hyphens) for the invoice number format
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+  const dateStr = `${year}${month}${day}`;
+  
+  // Send date in ISO format (YYYY-MM-DD) to backend for sequencing
+  const isoDateStr = today.toISOString().split('T')[0];
+  const res = await fetch(`${API_BASE}/next-invoice?date=${isoDateStr}`);
+  
   if (!res.ok) {
-    // Fallback to a local sequence starting at 1
+    // Fallback: use date format YYYYMMDD with sequence 001
     return `INV${dateStr}-001`;
   }
+  
   const data = await res.json();
-  return data.invoiceNo as string;
+  // If backend returns invoice number, use it directly
+  if (data.invoiceNo) {
+    return data.invoiceNo as string;
+  }
+  
+  // If backend returns sequence number only, format it
+  if (data.sequence !== undefined) {
+    const sequence = String(data.sequence).padStart(3, '0');
+    return `INV${dateStr}-${sequence}`;
+  }
+  
+  // Final fallback
+  return `INV${dateStr}-001`;
 };
