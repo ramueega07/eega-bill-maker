@@ -63,11 +63,20 @@ const GenerateBill = () => {
     const newItems = [...items];
     newItems[index] = { ...newItems[index], [field]: value };
     
-    // Auto-calculate amount
-    if (field === 'meters' || field === 'rate') {
-      const meters = field === 'meters' ? Number(value) : newItems[index].meters;
-      const rate = field === 'rate' ? Number(value) : newItems[index].rate;
-      newItems[index].amount = meters * rate;
+    // Auto-calculate amount: use pieces × rate if pieces is entered, otherwise use meters × rate
+    if (field === 'pieces' || field === 'meters' || field === 'rate') {
+      const pieces = field === 'pieces' ? Number(value) || 0 : newItems[index].pieces || 0;
+      const meters = field === 'meters' ? Number(value) || 0 : newItems[index].meters || 0;
+      const rate = field === 'rate' ? Number(value) || 0 : newItems[index].rate || 0;
+      
+      // Calculate amount based on which metric is used (pieces or meters)
+      if (pieces > 0) {
+        newItems[index].amount = pieces * rate;
+      } else if (meters > 0) {
+        newItems[index].amount = meters * rate;
+      } else {
+        newItems[index].amount = 0;
+      }
     }
     
     setItems(newItems);
@@ -269,7 +278,11 @@ const GenerateBill = () => {
                           <Input 
                             type="number" 
                             value={item.pieces || ''} 
-                            onChange={(e) => updateItem(index, 'pieces', Number(e.target.value))}
+                            onChange={(e) => {
+                              const val = e.target.value === '' ? 0 : Number(e.target.value);
+                              updateItem(index, 'pieces', val);
+                            }}
+                            placeholder="0"
                           />
                         </div>
                         <div>
@@ -277,7 +290,11 @@ const GenerateBill = () => {
                           <Input 
                             type="number" 
                             value={item.meters || ''} 
-                            onChange={(e) => updateItem(index, 'meters', Number(e.target.value))}
+                            onChange={(e) => {
+                              const val = e.target.value === '' ? 0 : Number(e.target.value);
+                              updateItem(index, 'meters', val);
+                            }}
+                            placeholder="0"
                           />
                         </div>
                         <div>
@@ -285,7 +302,11 @@ const GenerateBill = () => {
                           <Input 
                             type="number" 
                             value={item.rate || ''} 
-                            onChange={(e) => updateItem(index, 'rate', Number(e.target.value))}
+                            onChange={(e) => {
+                              const val = e.target.value === '' ? 0 : Number(e.target.value);
+                              updateItem(index, 'rate', val);
+                            }}
+                            placeholder="0.00"
                           />
                         </div>
                         <div>
